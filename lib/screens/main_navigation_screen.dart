@@ -16,11 +16,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Definimos las pantallas aquí adentro para que se rendericen correctamente
     final List<Widget> screens = [
-      DiscoverUsersScreen(),
-      LiveFeedScreen(),
-      ProfileScreen(),
+      const DiscoverUsersScreen(),
+      const LiveFeedScreen(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
