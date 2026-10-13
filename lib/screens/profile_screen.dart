@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -23,6 +24,118 @@ class _ProfileScreenState extends State<ProfileScreen>
     super.dispose();
   }
 
+  // Consulta para obtener las visitas desde Supabase
+  Future<List<Map<String, dynamic>>> _obtenerMisVisitas() async {
+    final miUsuarioId = Supabase.instance.client.auth.currentUser?.id;
+    if (miUsuarioId == null) return [];
+
+    try {
+      final response = await Supabase.instance.client
+          .from('profile_views')
+          .select(
+            'viewed_at, profiles:visitor_user_id(username, full_name, avatar_url)',
+          )
+          .eq('visited_user_id', miUsuarioId)
+          .order('viewed_at', ascending: false)
+          .limit(30);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      debugPrint('Error al obtener visitas: $e');
+      return [];
+    }
+  }
+
+  // Modal para mostrar los visitantes
+  void _mostrarModalVisitas(
+    BuildContext context,
+    List<Map<String, dynamic>> visitas,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Personas que vieron tu perfil',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white54),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const Divider(color: Colors.white12),
+              visitas.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(24.0),
+                      child: Center(
+                        child: Text(
+                          'Aún no registras visitas nuevas',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    )
+                  : Expanded(
+                      child: ListView.builder(
+                        itemCount: visitas.length,
+                        itemBuilder: (context, index) {
+                          final visita = visitas[index];
+                          final perfilVisitante =
+                              visita['profiles'] as Map<String, dynamic>?;
+                          final nombre =
+                              perfilVisitante?['full_name'] ??
+                              perfilVisitante?['username'] ??
+                              'Usuario';
+                          final avatarUrl = perfilVisitante?['avatar_url'];
+
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: avatarUrl != null
+                                  ? NetworkImage(avatarUrl)
+                                  : null,
+                              child: avatarUrl == null
+                                  ? const Icon(Icons.person)
+                                  : null,
+                            ),
+                            title: Text(
+                              nombre,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            subtitle: const Text(
+                              'Visitó tu perfil reciente',
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 12,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,11 +145,12 @@ class _ProfileScreenState extends State<ProfileScreen>
           return [
             SliverAppBar(
               backgroundColor: const Color(0xFF1E293B),
-              expandedHeight: 280,
+              expandedHeight:
+                  340, // Se ajusta la altura para dar espacio a la tarjeta
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
                 background: Padding(
-                  padding: const EdgeInsets.only(top: 60.0),
+                  padding: const EdgeInsets.only(top: 50.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -50,31 +164,31 @@ class _ProfileScreenState extends State<ProfileScreen>
                           ),
                         ),
                         child: const CircleAvatar(
-                          radius: 45,
+                          radius: 40,
                           backgroundColor: Colors.black,
                           child: Icon(
                             Icons.person,
-                            size: 50,
+                            size: 45,
                             color: Colors.white70,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       // Nombre de usuario
                       const Text(
                         'Maricel Herrera',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       const Text(
                         '@maricel_convos',
-                        style: TextStyle(color: Colors.white54, fontSize: 14),
+                        style: TextStyle(color: Colors.white54, fontSize: 13),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       // Estadísticas (Siguiendo, Seguidores, Likes)
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -85,6 +199,50 @@ class _ProfileScreenState extends State<ProfileScreen>
                           SizedBox(width: 24),
                           _ProfileStatItem(label: 'Me gusta', count: '8.5K'),
                         ],
+                      ),
+                      const SizedBox(height: 12),
+                      // TARJETA PRIVADA DE VISITAS AL PERFIL
+                      FutureBuilder<List<Map<String, dynamic>>>(
+                        future: _obtenerMisVisitas(),
+                        builder: (context, snapshot) {
+                          final visitas = snapshot.data ?? [];
+                          return GestureDetector(
+                            onTap: () => _mostrarModalVisitas(context, visitas),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F172A),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: const Color(0xFF8B5CF6)
+                                      .withOpacity(0.5),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.remove_red_eye_outlined,
+                                    color: Color(0xFF8B5CF6),
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Visitas al perfil (${visitas.length})',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -106,9 +264,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         body: TabBarView(
           controller: _tabController,
           children: const [
-            // Pestaña de Videos (Grid estilo TikTok)
             _MediaGridContent(isVideo: true),
-            // Pestaña de Fotos (Grid estilo Instagram)
             _MediaGridContent(isVideo: false),
           ],
         ),

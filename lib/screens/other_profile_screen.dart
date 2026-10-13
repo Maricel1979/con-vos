@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:convos/services/block_service.dart';
 
 class OtherProfileScreen extends StatefulWidget {
@@ -36,8 +35,8 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
     if (currentUserId == null || currentUserId == widget.targetUserId) return;
 
     try {
-      await _supabase.from('profile_visits').insert({
-        'profile_user_id': widget.targetUserId,
+      await _supabase.from('profile_views').insert({
+        'visited_user_id': widget.targetUserId,
         'visitor_user_id': currentUserId,
       });
     } catch (e) {
