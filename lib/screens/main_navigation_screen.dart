@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'discover_users_screen.dart';
-import 'profile_screen.dart'; // <-- Ahora está en la misma carpeta screens/
+import 'profile_screen.dart';
 import '../widgets/live_feed_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -14,18 +14,18 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  // Lista de pantallas conectadas a la barra de navegación inferior
-  final List<Widget> _screens = [
-    const DiscoverUsersScreen(),
-    const LiveFeedScreen(),
-    const ProfileScreen(), // <-- Pantalla de Perfil ordenada
-  ];
-
   @override
   Widget build(BuildContext context) {
+    // Definimos las pantallas aquí adentro para que se rendericen correctamente
+    final List<Widget> screens = [
+      DiscoverUsersScreen(),
+      LiveFeedScreen(),
+      ProfileScreen(),
+    ];
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
-      body: _screens[_currentIndex],
+      body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         backgroundColor: const Color(0xFF1E293B),
