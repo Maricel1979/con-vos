@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'terms_conditions_screen.dart';
+import '../widgets/locked_media_widget.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -145,16 +148,15 @@ class _ProfileScreenState extends State<ProfileScreen>
           return [
             SliverAppBar(
               backgroundColor: const Color(0xFF1E293B),
-              expandedHeight:
-                  340, // Se ajusta la altura para dar espacio a la tarjeta
+              expandedHeight: 340,
               pinned: true,
+
               flexibleSpace: FlexibleSpaceBar(
                 background: Padding(
                   padding: const EdgeInsets.only(top: 50.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Avatar de perfil con borde brillante
                       Container(
                         padding: const EdgeInsets.all(3),
                         decoration: const BoxDecoration(
@@ -174,7 +176,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Nombre de usuario
                       const Text(
                         'Maricel Herrera',
                         style: TextStyle(
@@ -189,7 +190,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                         style: TextStyle(color: Colors.white54, fontSize: 13),
                       ),
                       const SizedBox(height: 12),
-                      // Estadísticas (Siguiendo, Seguidores, Likes)
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -201,7 +201,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ],
                       ),
                       const SizedBox(height: 12),
-                      // TARJETA PRIVADA DE VISITAS AL PERFIL
                       FutureBuilder<List<Map<String, dynamic>>>(
                         future: _obtenerMisVisitas(),
                         builder: (context, snapshot) {
@@ -302,59 +301,125 @@ class _ProfileStatItem extends StatelessWidget {
   }
 }
 
-class _MediaGridContent extends StatelessWidget {
+class _MediaGridContent extends StatefulWidget {
   final bool isVideo;
 
   const _MediaGridContent({Key? key, required this.isVideo}) : super(key: key);
 
   @override
+  State<_MediaGridContent> createState() => _MediaGridContentState();
+}
+
+class _MediaGridContentState extends State<_MediaGridContent> {
+  final supabase = Supabase.instance.client;
+
+  Future<List<Map<String, dynamic>>> _obtenerPostsYCompras() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return [];
+
+    final tipoMedia = widget.isVideo ? 'video' : 'image';
+    final postsResponse = await supabase
+        .from('posts')
+        .select()
+        .eq('media_type', tipoMedia)
+        .order('created_at', ascending: false);
+
+    final posts = List<Map<String, dynamic>>.from(postsResponse);
+
+    final comprasResponse = await supabase
+        .from('content_purchases')
+        .select('post_id')
+        .eq('user_id', user.id);
+
+    final comprasIds = comprasResponse.map((c) => c['post_id']).toSet();
+
+    for (var post in posts) {
+      final postId = post['id'];
+      post['is_purchased'] = comprasIds.contains(postId);
+    }
+
+    return posts;
+  }
+
+  Future<void> _desbloquearContenido(String postId, double precio) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await supabase.from('content_purchases').insert({
+        'user_id': user.id,
+        'post_id': postId,
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('¡Contenido desbloqueado con éxito!')),
+      );
+
+      setState(() {});
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error al desbloquear: $e')));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 6,
-        mainAxisSpacing: 6,
-        childAspectRatio: 0.8,
-      ),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(8),
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _obtenerPostsYCompras(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF8B5CF6)),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error al cargar contenido',
+              style: TextStyle(color: Colors.white54),
+            ),
+          );
+        }
+
+        final posts = snapshot.data ?? [];
+
+        if (posts.isEmpty) {
+          return const Center(
+            child: Text(
+              'Aún no hay publicaciones en esta sección',
+              style: TextStyle(color: Colors.white54),
+            ),
+          );
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(8),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 6,
+            mainAxisSpacing: 6,
+            childAspectRatio: 0.8,
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Icon(
-                isVideo ? Icons.play_circle_fill : Icons.image,
-                color: Colors.white54,
-                size: 36,
-              ),
-              Positioned(
-                bottom: 8,
-                left: 8,
-                child: Row(
-                  children: [
-                    Icon(
-                      isVideo ? Icons.remove_red_eye : Icons.favorite,
-                      color: Colors.white70,
-                      size: 12,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${(index + 1) * 120}',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          itemCount: posts.length,
+          itemBuilder: (context, index) {
+            final post = posts[index];
+            final postId = post['id'];
+            final mediaUrl = post['media_url'] ?? '';
+            final isLocked = post['is_locked'] ?? false;
+            final price = (post['price'] ?? 0).toDouble();
+            final isPurchased = post['is_purchased'] ?? false;
+
+            return LockedMediaWidget(
+              mediaUrl: mediaUrl,
+              isLocked: isLocked,
+              price: price,
+              isPurchased: isPurchased,
+              currentUsername: 'maricel_convos',
+              onUnlockPressed: () => _desbloquearContenido(postId, price),
+            );
+          },
         );
       },
     );

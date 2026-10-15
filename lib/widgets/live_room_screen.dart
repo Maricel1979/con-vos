@@ -1,64 +1,172 @@
+import 'video_interactions_bar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Asegúrate de importar tus otros servicios/widgets si los usas aquí (Agora, etc.)
+import 'live_gifts_sheet.dart';
 
 class LiveRoomScreen extends StatefulWidget {
   final String roomId;
-  const LiveRoomScreen({Key? key, required this.roomId}) : super(key: key);
-
+  const LiveRoomScreen({super.key, required this.roomId});
   @override
   State<LiveRoomScreen> createState() => _LiveRoomScreenState();
 }
 
 class _LiveRoomScreenState extends State<LiveRoomScreen> {
-  final SupabaseClient supabase = Supabase.instance.client;
-  final TextEditingController _messageController = TextEditingController();
-
+  final supabase = Supabase.instance.client;
   late RealtimeChannel _roomChannel;
+  final TextEditingController _messageController = TextEditingController();
+  final List<Map<String, dynamic>> _messages = [];
 
-  // Lista o controlador para tus emojis locales si lo necesitas
-  // List<String> emojisActivos = [];
+  // Lista completa de emojis variados para el chat de los vivos
+  final List<String> _emojisGratuitos = const [
+    // Caras y Emociones
+    '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
+    '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙',
+    '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔',
+    '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥',
+    '😌', '😔', '😴', '🤤', '😷', '🤒', '🤕', '🤢', '🤮',
+    '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐',
+
+    // Corazones, Manos y Gestos
+    '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔',
+    '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💋',
+    '👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞',
+    '🫰', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️',
+    '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲',
+    '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶',
+
+    // Celebración, Objetos y Símbolos
+    '🔥', '⭐', '🌟', '✨', '⚡', '💥', '🎉', '🎊', '🎈', '🎁',
+    '🏆', '👑', '💎', '🌹', '🌷', '💐', '🌸', '🌺', '🌻', '🍻',
+    '🍷', '🍸', '🍹', '🍾', '🍕', '🍔', '🍟', '🍦', '🍩', '🍫',
+    '🎵', '🎶', '🎤', '🎧', '🎸', '🎹', '🎷', '🎺', '🥁', '💯',
+    '💃', '🕺', '👯‍♂️', '👯‍♀️', '☀️', '🌞', '⛈️', '🌤️', '🌈',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _initRealtimeReactions();
+
+    // Muestra el cartelito de seguridad a los 2 segundos de entrar al vivo
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.security, color: Color(0xFF10B981)),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '🛡️ Tip: Por tu seguridad, no compartas tu CBU, CVU o Alias en el vivo.',
+                      style: TextStyle(color: Colors.white, fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Color(0xFF1E293B),
+              duration: Duration(seconds: 10),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      });
+    });
+
+    _conectarCanalVivo();
   }
 
-  void _initRealtimeReactions() {
-    // Conectamos al canal único de esta sala
+  void _conectarCanalVivo() {
     _roomChannel = supabase.channel('room_${widget.roomId}');
-
-    // Escuchamos el evento de reacciones enviado por otros usuarios
     _roomChannel
         .onBroadcast(
-          event: 'reaction',
+          event: 'chat_message',
           callback: (payload) {
-            final emoji = payload['emoji'] as String?;
-            if (emoji != null && mounted) {
-              _mostrarEmojiFlotanteLocal(emoji);
+            if (mounted) {
+              setState(() {
+                _messages.add(payload);
+              });
             }
           },
         )
         .subscribe();
   }
 
-  void _mostrarEmojiFlotanteLocal(String emoji) {
-    // Lógica para disparar la animación del emoji en la pantalla
-    setState(() {
-      // Aquí puedes agregar el emoji a tu widget flotante
-    });
+  void _enviarTexto(String texto) {
+    if (texto.trim().isEmpty) return;
+
+    final textoMinus = texto.toLowerCase();
+
+    // Filtro estricto de seguridad para CBU, CVU, Alias, Teléfonos y Celulares
+    bool contieneDatosProhibidos =
+        textoMinus.contains('cbu') ||
+        textoMinus.contains('cvu') ||
+        textoMinus.contains('alias') ||
+        textoMinus.contains('cel') ||
+        textoMinus.contains('telefono') ||
+        textoMinus.contains('tel') ||
+        RegExp(r'\b(?:\+?54)?(?:9)?(?:0?[1-1]?[2-9]\d{2})?\d{6,8}\b')
+            .hasMatch(texto) ||
+        RegExp(r'\b\d{8,}\b').hasMatch(texto);
+
+    if (contieneDatosProhibidos) {
+      supabase.auth.signOut();
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: const Text(
+            'Cuenta suspendida',
+            style: TextStyle(color: Colors.redAccent),
+          ),
+          content: const Text(
+            'Se ha detectado un intento de compartir datos bancarios o números de celular/contacto prohibidos. Tu cuenta ha sido cerrada automáticamente por seguridad.',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/', (route) => false);
+              },
+              child: const Text(
+                'Entendido',
+                style: TextStyle(color: Color(0xFF8B5CF6)),
+              ),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final mensaje = {
+      'user': supabase.auth.currentUser?.email ?? 'Anónimo',
+      'text': texto.trim(),
+      'time': DateTime.now().toIso8601String(),
+    };
+
+    _roomChannel.sendBroadcastMessage(event: 'chat_message', payload: mensaje);
+
+    _messageController.clear();
   }
 
-  void enviarReaccion(String emoji) {
-    // 1. Mostrar localmente de forma inmediata
-    _mostrarEmojiFlotanteLocal(emoji);
-
-    // 2. Enviar por broadcast a todos los demás espectadores en la sala
-    _roomChannel.sendBroadcastMessage(
-      event: 'reaction',
-      payload: {'emoji': emoji},
+  void _mostrarMenuRegalos() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return const LiveGiftsSheet();
+      },
     );
   }
 
@@ -72,45 +180,222 @@ class _LiveRoomScreenState extends State<LiveRoomScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
-        title: Text('Sala: ${widget.roomId}'),
-        backgroundColor: Colors.deepPurple,
+        title: Row(
+          children: [
+            Image.asset('assets/icons/app_logo.png', width: 32, height: 32),
+            const SizedBox(width: 10),
+            Text('Sala: ${widget.roomId}'),
+          ],
+        ),
+        backgroundColor: const Color(0xFF1E293B),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.card_giftcard, color: Colors.pinkAccent),
+            tooltip: 'Enviar Regalo',
+            onPressed: _mostrarMenuRegalos,
+          ),
+        ],
       ),
       body: Stack(
         children: [
-          // Contenido principal de tu streaming y chat
-          Center(
-            child: Text(
-              'Transmisión en vivo activa',
-              style: TextStyle(color: Colors.white70),
-            ),
+          // Contenido principal de la sala (chat, emojis y entrada de texto)
+          Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = _messages[index];
+                    return ListTile(
+                      onLongPress: () => _mostrarOpcionesModeracion(msg, index),
+                      title: Text(
+                        msg['user'] ?? '',
+                        style: const TextStyle(
+                          color: Color(0xFF8B5CF6),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        msg['text'] ?? '',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(
+                          Icons.more_vert,
+                          color: Colors.white38,
+                          size: 18,
+                        ),
+                        onPressed: () => _mostrarOpcionesModeracion(msg, index),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              // Barra horizontal de Emojis Gratuitos
+              Container(
+                height: 45,
+                color: const Color(0xFF1E293B).withOpacity(0.5),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _emojisGratuitos.length,
+                  itemBuilder: (context, index) {
+                    final emoji = _emojisGratuitos[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      child: InkWell(
+                        onTap: () => _enviarTexto(emoji),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          alignment: Alignment.center,
+                          child: Text(
+                            emoji,
+                            style: const TextStyle(fontSize: 22),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              // Caja de texto y botones inferiores
+              Container(
+                padding: const EdgeInsets.all(8),
+                color: const Color(0xFF1E293B),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _messageController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(
+                          hintText: 'Escribe un mensaje o emoji...',
+                          hintStyle: TextStyle(color: Colors.white54),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.send, color: Color(0xFF8B5CF6)),
+                      onPressed: () => _enviarTexto(_messageController.text),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
 
-          // Botones de reacción flotantes de prueba
+          // Botones flotantes de interacción a la derecha (Corazón, Comentarios, Compartir)
           Positioned(
-            bottom: 30,
-            right: 20,
-            child: Row(
-              children: [
-                FloatingActionButton(
-                  mini: true,
-                  heroTag: 'btn_heart',
-                  onPressed: () => enviarReaccion('❤️'),
-                  child: Text('❤️', style: TextStyle(fontSize: 20)),
-                ),
-                SizedBox(width: 8),
-                FloatingActionButton(
-                  mini: true,
-                  heroTag: 'btn_fire',
-                  onPressed: () => enviarReaccion('🔥'),
-                  child: Text('🔥', style: TextStyle(fontSize: 20)),
-                ),
-              ],
+            right: 16,
+            bottom: 120,
+            child: BotonesInteraccionVertical(
+              cantidadMeGustaInicial: 1250,
+              cantidadComentarios: 84,
+              alPresionarComentarios: () {
+                // Lógica para abrir comentarios
+              },
+              alPresionarCompartir: () {
+                // Lógica para compartir
+              },
             ),
           ),
         ],
       ),
-      backgroundColor: Colors.black,
+    );
+  }
+
+  void _mostrarOpcionesModeracion(Map<String, dynamic> msg, int index) {
+    final usuario = msg['user'] ?? 'Anónimo';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(
+                  'Opciones de moderación: $usuario',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const Divider(color: Colors.white10),
+              ListTile(
+                leading: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.amberAccent,
+                ),
+                title: const Text(
+                  'Eliminar este comentario',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _messages.removeAt(index);
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Comentario eliminado del vivo.'),
+                      backgroundColor: Colors.amber,
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.block, color: Colors.redAccent),
+                title: Text(
+                  'Bloquear a $usuario',
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _messages.removeWhere((m) => m['user'] == usuario);
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Usuario $usuario bloqueado y removido.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
     );
   }
 }

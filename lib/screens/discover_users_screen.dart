@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../widgets/live_room_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DiscoverUsersScreen extends StatefulWidget {
   const DiscoverUsersScreen({Key? key}) : super(key: key);
@@ -10,135 +9,163 @@ class DiscoverUsersScreen extends StatefulWidget {
 }
 
 class _DiscoverUsersScreenState extends State<DiscoverUsersScreen> {
-  final List<Map<String, String>> _allUsers = const [
-    {'id': 'usr_001', 'name': 'María López', 'status': 'En vivo'},
-    {'id': 'usr_002', 'name': 'Carlos Gómez', 'status': 'Disponible'},
-    {'id': 'usr_003', 'name': 'Ana Martínez', 'status': 'En vivo'},
-  ];
+  final supabase = Supabase.instance.client;
 
-  List<Map<String, String>> _filteredUsers = [];
-  final TextEditingController _searchController = TextEditingController();
+  Future<List<Map<String, dynamic>>> _obtenerVideosFeed() async {
+    try {
+      // Obtenemos los posts que sean de tipo video
+      final response = await supabase
+          .from('posts')
+          .select('*, profiles:user_id(username, avatar_url)')
+          .eq('media_type', 'video')
+          .order('created_at', ascending: false);
 
-  @override
-  void initState() {
-    super.initState();
-    _filteredUsers = _allUsers;
-    _searchController.addListener(_filterUsers);
-  }
-
-  void _filterUsers() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredUsers = _allUsers.where((user) {
-        final name = user['name']!.toLowerCase();
-        return name.contains(query);
-      }).toList();
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _startCallOrLive(BuildContext context, String userId, String userName) {
-    final String dynamicChannelName = 'room_$userId';
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LiveRoomScreen(roomId: dynamicChannelName),
-      ),
-    );
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      debugPrint('Error al cargar feed de videos: $e');
+      return [];
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      appBar: AppBar(
-        title: const Text('Descubrir Usuarios'),
-        backgroundColor: const Color(0xFF1E293B),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Buscar usuario por nombre...',
-                hintStyle: const TextStyle(color: Colors.white54),
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF8B5CF6)),
-                filled: true,
-                fillColor: const Color(0xFF1E293B),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      backgroundColor: Colors.black,
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _obtenerVideosFeed(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF8B5CF6)),
+            );
+          }
+
+          final videos = snapshot.data ?? [];
+
+          if (videos.isEmpty) {
+            return const Center(
+              child: Text(
+                'No hay videos disponibles en este momento',
+                style: TextStyle(color: Colors.white54),
               ),
-            ),
-          ),
-          Expanded(
-            child: _filteredUsers.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No se encontraron usuarios',
-                      style: TextStyle(color: Colors.white54),
+            );
+          }
+
+          // Feed vertical estilo TikTok
+          return PageView.builder(
+            scrollDirection: Axis.vertical,
+            itemCount: videos.length,
+            itemBuilder: (context, index) {
+              final video = videos[index];
+              final mediaUrl = video['media_url'] ?? '';
+              final caption = video['caption'] ?? 'Sin descripción';
+              final perfil = video['profiles'] as Map<String, dynamic>?;
+              final username = perfil?['username'] ?? 'usuario_convos';
+
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  // 1. Fondo / Reproductor de video (aquí puedes integrar tu reproductor de video o imagen temporal)
+                  Container(
+                    color: const Color(0xFF1E293B),
+                    child: Image.network(
+                      mediaUrl.isNotEmpty
+                          ? mediaUrl
+                          : 'https://via.placeholder.com/400x800',
+                      fit: BoxFit.cover,
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    itemCount: _filteredUsers.length,
-                    itemBuilder: (context, index) {
-                      final user = _filteredUsers[index];
-                      return Card(
-                        color: const Color(0xFF1E293B),
-                        margin: const EdgeInsets.symmetric(vertical: 6.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundColor: Color(0xFF8B5CF6),
-                            child: Icon(Icons.person, color: Colors.white),
-                          ),
-                          title: Text(
-                            user['name']!,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Text(
-                            user['status']!,
-                            style: const TextStyle(color: Colors.white54),
-                          ),
-                          trailing: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF8B5CF6),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            icon: const Icon(Icons.video_call, size: 18),
-                            label: const Text('Conectar'),
-                            onPressed: () => _startCallOrLive(
-                              context,
-                              user['id']!,
-                              user['name']!,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
                   ),
-          ),
-        ],
+
+                  // 2. Degradado inferior para legibilidad del texto
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.8),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  ),
+
+                  // 3. Información del creador y descripción abajo a la izquierda
+                  Positioned(
+                    bottom: 40,
+                    left: 16,
+                    right: 80,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '@$username',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          caption,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 4. Botones de interacción a la derecha (Like, Compartir)
+                  Positioned(
+                    bottom: 40,
+                    right: 16,
+                    child: Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                          onPressed: () {
+                            // Lógica de Me gusta
+                          },
+                        ),
+                        const Text(
+                          '8.5K',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                        const SizedBox(height: 20),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.share,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                          onPressed: () {
+                            // Lógica para compartir enlace público
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Enlace copiado al portapapeles'),
+                              ),
+                            );
+                          },
+                        ),
+                        const Text(
+                          'Compartir',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
