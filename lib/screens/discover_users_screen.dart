@@ -16,7 +16,7 @@ class _DiscoverUsersScreenState extends State<DiscoverUsersScreen> {
       // Obtenemos los posts que sean de tipo video
       final response = await supabase
           .from('posts')
-          .select('*, profiles:user_id(username, avatar_url)')
+          .select('*, profiles:id(username, full_name, avatar_url)')
           .eq('media_type', 'video')
           .order('created_at', ascending: false);
 
