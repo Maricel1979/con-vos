@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TermsConditionsScreen extends StatefulWidget {
-  final bool requireAcceptance; // true si es obligatoria durante el registro
+  final bool requireAcceptance; // true si es obligatoria la aceptación
 
   const TermsConditionsScreen({Key? key, this.requireAcceptance = false})
     : super(key: key);
@@ -46,47 +46,74 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
                     ),
                     Divider(color: Colors.white24, height: 24),
 
-                    // 1. Edad
+                    // 1. EDAD
                     _TermSection(
                       title: '1. RESTRICCIÓN DE EDAD (+18)',
-                      content: 'CONVOS es de uso exclusivo para personas mayores de 18 años. Queda totalmente prohibido el registro o transmisión por parte de menores de edad. La plataforma se reserva el derecho de solicitar verificación de identidad y eliminar de inmediato cuentas pertenecientes a menores.',
+                      content: 'CONVOS es de uso exclusivo para personas mayores de 18 años. Queda totalmente prohibido el registro, transmisión o monetización por parte de menores de edad. La plataforma se reserva el derecho de solicitar verificación de identidad (KYC) y eliminar de inmediato cuentas pertenecientes a menores.',
                     ),
 
-                    // 2. Responsabilidad de contenido
+                    // 2. CONDUCTA Y NORMAS
                     _TermSection(
-                      title: '2. RESPONSABILIDAD EXCLUSIVA DEL USUARIO',
-                      content: 'Los usuarios son los únicos y absolutos responsables de todo el contenido, transmisiones, mensajes e imágenes que compartan. CONVOS actúa como un intermediario tecnológico y no asume responsabilidad civil, penal ni comercial por el contenido de los usuarios.',
+                      title: '2. DIRECTRICES DE CONDUCTA Y TOLERANCIA CERO',
+                      content: 'Queda estrictamente prohibido el contenido sexual explícito, desnudez (total o parcial), ropa interior en transmisiones públicas, actos sexuales, consumo de sustancias ilícitas, violencia, acoso o discursos de odio. CONVOS se reserva el derecho de suspender, bloquear por HWID/IP o eliminar cuentas infractoras de forma unilateral y sin previo aviso.',
                     ),
 
-                    // 3. Convivencia y Baneo
+                    // 3. RESPONSABILIDAD SUBJETIVA
                     _TermSection(
-                      title: '3. NORMAS DE CONVIVENCIA Y TOLERANCIA CERO',
-                      content: 'Está estrictamente prohibido el contenido sexual explícito, violento, acosador o ilegal. CONVOS se reserva el derecho de suspender o bloquear cuentas infractoras sin previo aviso.',
+                      title: '3. RESPONSABILIDAD SUBJETIVA POR CONTENIDO (DOCTRINA BELÉN RODRÍGUEZ)',
+                      content: 'Los usuarios son los únicos responsables de todo el contenido, transmisiones en vivo, mensajes e imágenes que compartan. CONVOS actúa como un intermediario tecnológico y no realiza un monitoreo previo generalizado. Conforme a la jurisprudencia aplicable, la plataforma solo será responsable si, tras ser notificada fehacientemente sobre un contenido ilegal o infractor, no actuase con celeridad para removerlo.',
                     ),
 
-                    // 4. Retención de Fondos
+                    // 4. RETENCIÓN DE FONDOS
                     _TermSection(
-                      title: '4. RETENCIÓN DE FONDOS POR INFRACCIÓN',
-                      content: 'En caso de baneo o suspensión debido a violaciones graves de las reglas, acoso o fraude, todos los fondos acumulados, ganancias o saldos pendientes quedarán automáticamente retenidos a favor de la plataforma como penalización por daños.',
+                      title: '4. RETENCIÓN DE FONDOS Y PENALIZACIÓN POR INFRACCIÓN',
+                      content: 'En caso de baneo o suspensión debido a violaciones graves de las reglas, acoso, contenido ilegal o fraude, todos los fondos acumulados, ganancias o saldos pendientes dentro de la app quedarán retenidos a favor de la plataforma como penalización por daños y perjuicios.',
                     ),
 
-                    // 5. Autoridades
+                    // 5. ECONOMÍA VIRTUAL Y REEMBOLSOS
                     _TermSection(
-                      title: '5. DENUNCIA Y COOPERACIÓN CON AUTORIDADES',
-                      content: 'Si se detecta o sospecha que un usuario está siendo obligado, coaccionado o extorsionado, o ante la presencia de actividades delictivas, CONVOS dará aviso inmediato a las autoridades correspondientes compartiendo la información de registro para la investigación legal.',
+                      title: '5. ECONOMÍA VIRTUAL, MONEDAS Y RETIROS',
+                      content: 'Las compras de monedas digitales, diamantes y bienes virtuales dentro de la aplicación son finales y no reembolsables. Para usuarios en la República Argentina, se contempla el derecho de revocación (botón de arrepentimiento) exclusivamente sobre compras no consumidas ni canjeadas dentro de los 10 días corridos.',
                     ),
 
-                    // 6. Offline
+                    // 6. VALIDACIÓN KYC Y NORMATIVA FISCAL
                     _TermSection(
-                      title: '6. EXENCIÓN DE RESPONSABILIDAD FUERA DE LÍNEA',
-                      content: 'CONVOS no recomienda ni organiza encuentros presenciales o citas cara a cara. Cualquier contacto o reunión fuera de la app es responsabilidad exclusiva de los involucrados.',
+                      title: '6. VALIDACIÓN KYC Y CUMPLIMIENTO FISCAL (ARCA / ARBA)',
+                      content:
+                          'Para retirar fondos o ganancias por dinero real, el creador deberá realizar de forma obligatoria la validación de identidad (KYC con DNI y biometría).\n'
+                          '• Residentes en Argentina: Los cobros se realizarán en Pesos Argentinos (ARS) vía CBU/CVU. La plataforma y sus pasarelas asociadas podrán actuar como agentes de retención e informar movimientos ante organismos tributarios (ARCA y ARBA).\n'
+                          '• Creadores en el Exterior: Los retiros en divisas (USD/Cripto) se procesarán mediante pasarelas internacionales, siendo a cargo del creador las comisiones de intermediarios.',
+                    ),
+
+                    // 7. PRIVACIDAD DE DATOS
+                    _TermSection(
+                      title: '7. PROTECCIÓN DE DATOS PERSONALES (LEY 25.326 Y GDPR)',
+                      content: 'Los datos personales recopilados (email, datos bancarios, geolocalización, uso de cámara y micrófono) se tratan bajo estrictos protocolos de seguridad conforme a la Ley N° 25.326 de Argentina y estándares internacionales como el GDPR. El usuario puede solicitar el acceso, rectificación o eliminación total de sus datos en cualquier momento.',
+                    ),
+
+                    // 8. AUTORIDADES
+                    _TermSection(
+                      title: '8. DENUNCIA Y COOPERACIÓN CON AUTORIDADES',
+                      content: 'Si se detecta o sospecha que un usuario está siendo obligado, coaccionado o extorsionado, o ante la presencia de actividades delictivas, CONVOS dará aviso inmediato a las autoridades correspondientes compartiendo la información de registro necesaria para la investigación legal.',
+                    ),
+
+                    // 9. OFFLINE
+                    _TermSection(
+                      title: '9. EXENCIÓN DE RESPONSABILIDAD FUERA DE LÍNEA',
+                      content: 'CONVOS no recomienda ni organiza encuentros presenciales o citas cara a cara. Cualquier contacto, reunión o transacción fuera de la aplicación es responsabilidad exclusiva e independiente de los involucrados.',
+                    ),
+
+                    // 10. JURISDICCIÓN
+                    _TermSection(
+                      title: '10. LEY APLICABLE Y JURISDICCIÓN',
+                      content: 'Los presentes términos se rigen por las leyes de la República Argentina. Cualquier controversia judicial se someterá a los Tribunales Ordinarios en lo Comercial de la Ciudad Autónoma de Buenos Aires, sin perjuicio de las normas de orden público vigentes en materia de Defensa del Consumidor.',
                     ),
                   ],
                 ),
               ),
             ),
 
-            // Muestra casilla y botón de aceptar sólo si viene del registro
+            // Casilla de verificación y botón (solo si requiere aceptación)
             if (widget.requireAcceptance) ...[
               Container(
                 color: const Color(0xFF1E293B),
