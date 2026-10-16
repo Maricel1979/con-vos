@@ -10,16 +10,20 @@ class DiscoverUsersScreen extends StatefulWidget {
 
 class _DiscoverUsersScreenState extends State<DiscoverUsersScreen> {
   final supabase = Supabase.instance.client;
-
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
   Future<List<Map<String, dynamic>>> _obtenerVideosFeed() async {
     try {
-      // Obtenemos los posts que sean de tipo video
-      final response = await supabase
+      var query = supabase
           .from('posts')
           .select('*, profiles:id(username, full_name, avatar_url)')
-          .eq('media_type', 'video')
-          .order('created_at', ascending: false);
+          .eq('media_type', 'video');
 
+      if (_searchQuery.isNotEmpty) {
+        query = query.ilike('profiles.username', '%$_searchQuery%');
+      }
+
+      final response = await query.order('created_at', ascending: false);
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
       debugPrint('Error al cargar feed de videos: $e');
@@ -31,7 +35,47 @@ class _DiscoverUsersScreenState extends State<DiscoverUsersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      body: Column(
+        children: [
+          // Buscador con la lupa
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              controller: _searchController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Buscar usuarios...',
+                hintStyle: const TextStyle(color: Colors.grey),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF8B5CF6)),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        onPressed: () {
+                          setState(() {
+                            _searchController.clear();
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: Colors.grey[900],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
+          ),
+
+          // Feed de videos
+          Expanded(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
         future: _obtenerVideosFeed(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -167,6 +211,6 @@ class _DiscoverUsersScreenState extends State<DiscoverUsersScreen> {
           );
         },
       ),
-    );
+      )
   }
 }
