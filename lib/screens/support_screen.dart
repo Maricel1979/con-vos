@@ -15,7 +15,7 @@ class _SupportScreenState extends State<SupportScreen> {
   final List<Map<String, dynamic>> _messages = [
     {
       'isBot': true,
-      'text': '¡Hola! Soy la asistente virtual de CONVOS 🤖. ¿En qué puedo ayudarte hoy?',
+      'text': '¡Hola! Soy Bruno, tu asistente virtual de CONVOS 🤖. ¿En qué puedo ayudarte hoy?',
       'time': 'Ahora',
     },
   ];
@@ -31,7 +31,7 @@ class _SupportScreenState extends State<SupportScreen> {
       _messageController.clear();
     });
 
-    // Simulación de respuesta automática de la Asistente IA
+    // Simulación de respuesta inteligente de Bruno (Asistente IA)
     Future.delayed(const Duration(milliseconds: 800), () {
       if (!mounted) return;
 
@@ -39,19 +39,37 @@ class _SupportScreenState extends State<SupportScreen> {
       final lowerText = text.toLowerCase();
 
       if (lowerText.contains('token') || lowerText.contains('comprar')) {
-        reply = 'Para comprar tokens, ve a Ajustes > Zona de Compras y elige el paquete que prefieras. Recuerda que 1 Token = \$0.01 USD. 🪙';
+        reply = 'Para comprar tokens, ve a Ajustes > Billetera (Zona de Compras) y elige el paquete. Recuerda que 1 Token = \$0.01 USD. 🪙';
       } else if (lowerText.contains('cbu') ||
           lowerText.contains('retiro') ||
-          lowerText.contains('cobrar')) {
-        reply = 'Los retiros se realizan ingresando tu CBU/CVU en la Zona de Creadora. Cobras el 50% neto de tus ganancias directo a tu cuenta bancaria en pesos ARS. 🏦';
+          lowerText.contains('cobrar') ||
+          lowerText.contains('minimo') ||
+          lowerText.contains('lunes')) {
+        reply = 'Las solicitudes de retiro son los LUNES (mínimo \$15.000 ARS). Cobras el 50% neto de tus ganancias directo a tu CBU/CVU en pesos ARS. 🏦';
+      } else if (lowerText.contains('bloquear') ||
+          lowerText.contains('bloqueo') ||
+          lowerText.contains('reportar') ||
+          lowerText.contains('usuario') ||
+          lowerText.contains('silenciar')) {
+        reply = '🛡️ BLOQUEO Y MODERACIÓN EN CONVOS:\n\n1. En los Vivos: Mantén presionado cualquier mensaje o toca los tres puntos (...) junto al usuario para seleccionar "Bloquear" o "Eliminar comentario".\n2. En Perfiles/Descubrir: Ingresa al perfil del usuario y presiona los tres puntos superiores para "Bloquear perfil". Sus comentarios y transmisiones desaparecerán de tu vista inmediatamente.';
+      } else if (lowerText.contains('termino') ||
+          lowerText.contains('condicion') ||
+          lowerText.contains('regla') ||
+          lowerText.contains('politica')) {
+        reply = '📋 NORMAS CLAVE DE CONVOS:\n\n1. Comisión 50/50 entre creadora y plataforma.\n2. Retiros exclusivamente los lunes (mínimo \$15.000 ARS).\n3. Verificación KYC por única vez.\n4. Prohibición estricta de intercambiar teléfonos, redes sociales o links de pago externos.';
+      } else if (lowerText.contains('contacto') ||
+          lowerText.contains('redes') ||
+          lowerText.contains('whatsapp') ||
+          lowerText.contains('fuera')) {
+        reply = '⚠️ Por seguridad de la comunidad, está prohibido pasar números de teléfono o redes sociales. El sistema detecta intentos y suspende la cuenta automáticamente.';
       } else if (lowerText.contains('humano') ||
           lowerText.contains('ayuda') ||
-          lowerText.contains('persona')) {
-        reply = 'Entendido. Estoy derivando tu consulta con el equipo de soporte. Te llegará una notificación cuando un agente te responda. 📩';
+          lowerText.contains('persona') ||
+          lowerText.contains('admin')) {
+        reply = 'Entendido. Estoy derivando tu consulta con un administrador. Te avisaremos apenas te respondan. 📩';
         _isEscalatedToHuman = true;
       } else {
-        reply =
-            'Entiendo tu consulta sobre "$text". Si deseas que un representante revise tu caso personalmente, escribe "Hablar con humano".';
+        reply = 'Entiendo tu consulta. Soy Bruno 🤖 y te puedo ayudar con:\n• Bloqueos y reportes de usuarios\n• Reglas de retiros (lunes y \$15.000 ARS)\n• Compra de tokens y Billetera\n• Términos y condiciones\n\nSi necesitas ayuda humana, escribe "Hablar con humano".';
       }
 
       setState(() {
@@ -69,7 +87,7 @@ class _SupportScreenState extends State<SupportScreen> {
           children: [
             Icon(Icons.smart_toy, color: Color(0xFF8B5CF6)),
             SizedBox(width: 8),
-            Text('Soporte y Asistente CONVOS'),
+            Text('Soporte - Asistente Bruno'),
           ],
         ),
         backgroundColor: const Color(0xFF1E293B),
@@ -88,7 +106,7 @@ class _SupportScreenState extends State<SupportScreen> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Consulta derivada al Administrador. Se te avisará con un tilde cuando respondan.',
+                      'Consulta derivada al Administrador. Se te avisará cuando respondan.',
                       style: TextStyle(color: Colors.amber, fontSize: 12),
                     ),
                   ),
@@ -163,7 +181,7 @@ class _SupportScreenState extends State<SupportScreen> {
                     controller: _messageController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Escribe tu consulta aquí...',
+                      hintText: 'Escribe tu consulta a Bruno aquí...',
                       hintStyle: const TextStyle(color: Colors.white38),
                       filled: true,
                       fillColor: const Color(0xFF0F172A),

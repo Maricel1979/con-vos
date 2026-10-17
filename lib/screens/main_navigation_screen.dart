@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:convos/screens/discover_users_screen.dart';
-import 'package:convos/widgets/live_room_screen.dart';
-import 'package:convos/screens/profile_screen.dart';
-import 'package:convos/screens/settings_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'terms_conditions_screen.dart';
+import 'discover_users_screen.dart';
+import 'profile_screen.dart';
+import 'settings_screen.dart';
+import '../widgets/live_room_screen.dart'; // O la ruta correcta donde esté live_room
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({Key? key}) : super(key: key);
@@ -23,6 +26,51 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   ];
 
   @override
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _verificarTerminos();
+    });
+  }
+
+  Future<void> _verificarTerminos() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    // Consultamos si el usuario ya aceptó los términos
+    final response = await Supabase.instance.client
+        .from('profiles')
+        .select('terms_accepted')
+        .eq('id', userId)
+        .maybeSingle();
+
+    final bool acepto = response?['terms_accepted'] ?? false;
+
+    // Si no aceptó, le mostramos la pantalla de Términos exigiendo aceptación
+    if (!acepto && mounted) {
+      final resultado = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              const TermsConditionsScreen(requireAcceptance: true),
+        ),
+      );
+
+      // Cuando toca "Continuar", guardamos la confirmación en Supabase
+      if (resultado == true && userId != null) {
+        await Supabase.instance.client
+            .from('profiles')
+            .update({
+              'terms_accepted': true,
+              'terms_version': 'v1.0_2026',
+              'terms_accepted_at': DateTime.now().toIso8601String(),
+            })
+            .eq('id', userId);
+      }
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),

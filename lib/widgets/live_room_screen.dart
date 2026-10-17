@@ -296,18 +296,106 @@ class _LiveRoomScreenState extends State<LiveRoomScreen> {
           ),
 
           // Botones flotantes de interacción a la derecha (Corazón, Comentarios, Compartir)
+          // Botones flotantes de interacción a la derecha para Vivos (Corazón, Fueguito, Compartir)
           Positioned(
             right: 16,
             bottom: 120,
-            child: BotonesInteraccionVertical(
-              cantidadMeGustaInicial: 1250,
-              cantidadComentarios: 84,
-              alPresionarComentarios: () {
-                // Lógica para abrir comentarios
-              },
-              alPresionarCompartir: () {
-                // Lógica para compartir
-              },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 1. Botón Corazón
+                Column(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.favorite,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('❤️ Enviaste un corazón al vivo'),
+                            duration: Duration(milliseconds: 600),
+                            backgroundColor: Colors.pink,
+                          ),
+                        );
+                      },
+                    ),
+                    const Text(
+                      '1250',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+
+                // 2. Botón Fueguito 🔥 (Reemplaza a comentarios en Vivos)
+                Column(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        _enviarTexto('🔥');
+                      },
+                      borderRadius: BorderRadius.circular(24),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Text('🔥', style: TextStyle(fontSize: 26)),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Fueguito',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+
+                // 3. Botón Compartir 🔗
+                Column(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.share,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              '🔗 Enlace del vivo copiado para compartir',
+                            ),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Color(0xFF8B5CF6),
+                          ),
+                        );
+                      },
+                    ),
+                    const Text(
+                      'Compartir',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

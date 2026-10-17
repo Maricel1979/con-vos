@@ -49,64 +49,78 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
                     // 1. EDAD
                     _TermSection(
                       title: '1. RESTRICCIÓN DE EDAD (+18)',
-                      content: 'CONVOS es de uso exclusivo para personas mayores de 18 años. Queda totalmente prohibido el registro, transmisión o monetización por parte de menores de edad. La plataforma se reserva el derecho de solicitar verificación de identidad (KYC) y eliminar de inmediato cuentas pertenecientes a menores.',
+                      content: 'CONVOS es de uso exclusivo para personas mayores de 18 años (conforme a la Ley N° 26.061). Queda estrictamente prohibido el registro, acceso, interacción o monetización por parte de menores de edad. La plataforma eliminará de inmediato cualquier cuenta perteneciente a un menor.',
                     ),
 
-                    // 2. CONDUCTA Y NORMAS
+                    // 2. PROHIBICIÓN DE DATOS DE CONTACTO
                     _TermSection(
-                      title: '2. DIRECTRICES DE CONDUCTA Y TOLERANCIA CERO',
-                      content: 'Queda estrictamente prohibido el contenido sexual explícito, desnudez (total o parcial), ropa interior en transmisiones públicas, actos sexuales, consumo de sustancias ilícitas, violencia, acoso o discursos de odio. CONVOS se reserva el derecho de suspender, bloquear por HWID/IP o eliminar cuentas infractoras de forma unilateral y sin previo aviso.',
+                      title: '2. PROHIBICIÓN DE COMPARTIR DATOS DE CONTACTO Y BANEO',
+                      content: 'Queda estrictamente prohibido compartir, solicitar o difundir números de teléfono/celular, alias bancarios, CBU/CVU, enlaces de pago externos o redes sociales dentro de chats, salas o perfiles. CONVOS se reserva el derecho de suspender o eliminar definitivamente la cuenta infractora sin previo aviso.',
                     ),
 
-                    // 3. RESPONSABILIDAD SUBJETIVA
+                    // 3. REMUNERACIÓN, COMISIÓN Y RETIROS
+                    // 3. REMUNERACIÓN, COMISIÓN Y RETIROS
                     _TermSection(
-                      title: '3. RESPONSABILIDAD SUBJETIVA POR CONTENIDO (DOCTRINA BELÉN RODRÍGUEZ)',
-                      content: 'Los usuarios son los únicos responsables de todo el contenido, transmisiones en vivo, mensajes e imágenes que compartan. CONVOS actúa como un intermediario tecnológico y no realiza un monitoreo previo generalizado. Conforme a la jurisprudencia aplicable, la plataforma solo será responsable si, tras ser notificada fehacientemente sobre un contenido ilegal o infractor, no actuase con celeridad para removerlo.',
-                    ),
-
-                    // 4. RETENCIÓN DE FONDOS
-                    _TermSection(
-                      title: '4. RETENCIÓN DE FONDOS Y PENALIZACIÓN POR INFRACCIÓN',
-                      content: 'En caso de baneo o suspensión debido a violaciones graves de las reglas, acoso, contenido ilegal o fraude, todos los fondos acumulados, ganancias o saldos pendientes dentro de la app quedarán retenidos a favor de la plataforma como penalización por daños y perjuicios.',
-                    ),
-
-                    // 5. ECONOMÍA VIRTUAL Y REEMBOLSOS
-                    _TermSection(
-                      title: '5. ECONOMÍA VIRTUAL, MONEDAS Y RETIROS',
-                      content: 'Las compras de monedas digitales, diamantes y bienes virtuales dentro de la aplicación son finales y no reembolsables. Para usuarios en la República Argentina, se contempla el derecho de revocación (botón de arrepentimiento) exclusivamente sobre compras no consumidas ni canjeadas dentro de los 10 días corridos.',
-                    ),
-
-                    // 6. VALIDACIÓN KYC Y NORMATIVA FISCAL
-                    _TermSection(
-                      title: '6. VALIDACIÓN KYC Y CUMPLIMIENTO FISCAL (ARCA / ARBA)',
+                      title: '3. COMISIÓN, LIQUIDACIONES Y RETIROS',
                       content:
-                          'Para retirar fondos o ganancias por dinero real, el creador deberá realizar de forma obligatoria la validación de identidad (KYC con DNI y biometría).\n'
-                          '• Residentes en Argentina: Los cobros se realizarán en Pesos Argentinos (ARS) vía CBU/CVU. La plataforma y sus pasarelas asociadas podrán actuar como agentes de retención e informar movimientos ante organismos tributarios (ARCA y ARBA).\n'
-                          '• Creadores en el Exterior: Los retiros en divisas (USD/Cripto) se procesarán mediante pasarelas internacionales, siendo a cargo del creador las comisiones de intermediarios.',
+                          '• División de Ingresos: El valor consumido en fichas/tokens dentro de salas o chats se distribuye en un 50% para el creador y un 50% para la plataforma por servicio e infraestructura.\n'
+                          '• Solicitud de Retiro: Las liquidaciones se procesan únicamente los días lunes.\n'
+                          '• Monto Mínimo: El piso mínimo para solicitar un retiro a tu cuenta bancaria o billetera virtual es de \$15.000 ARS. Si no se alcanza dicho saldo el lunes, este permanecerá acumulado para la semana siguiente.\n'
+                          '• Verificación KYC por Única Vez: La validación de identidad (DNI y biometría) se realiza una sola vez al activar la monetización. No se volverá a solicitar para futuros retiros.',
                     ),
 
-                    // 7. PRIVACIDAD DE DATOS
+                    // 4. CONDUCTA Y NORMAS
                     _TermSection(
-                      title: '7. PROTECCIÓN DE DATOS PERSONALES (LEY 25.326 Y GDPR)',
-                      content: 'Los datos personales recopilados (email, datos bancarios, geolocalización, uso de cámara y micrófono) se tratan bajo estrictos protocolos de seguridad conforme a la Ley N° 25.326 de Argentina y estándares internacionales como el GDPR. El usuario puede solicitar el acceso, rectificación o eliminación total de sus datos en cualquier momento.',
+                      title: '4. DIRECTRICES DE CONDUCTA Y TOLERANCIA CERO',
+                      content: 'Queda prohibido el contenido sexual explícito, actos sexuales en vivo, consumo de sustancias ilícitas, violencia, acoso, extorsión o grooming (Ley 26.388). La app sancionará las infracciones con el bloqueo de cuenta/IP y dará aviso a la Justicia si correspondiera.',
                     ),
 
-                    // 8. AUTORIDADES
+                    // 5. RESPONSABILIDAD SUBJETIVA
                     _TermSection(
-                      title: '8. DENUNCIA Y COOPERACIÓN CON AUTORIDADES',
-                      content: 'Si se detecta o sospecha que un usuario está siendo obligado, coaccionado o extorsionado, o ante la presencia de actividades delictivas, CONVOS dará aviso inmediato a las autoridades correspondientes compartiendo la información de registro necesaria para la investigación legal.',
+                      title: '5. RESPONSABILIDAD SUBJETIVA POR CONTENIDO',
+                      content: 'Conforme a la doctrina judicial "Belén Rodríguez" (CSJN), los usuarios son responsables únicos de sus publicaciones y transmisiones. CONVOS actúa como intermediario tecnológico y removerá contenidos infractores tras ser notificado fehacientemente.',
                     ),
 
-                    // 9. OFFLINE
+                    // 6. RETENCIÓN DE FONDOS
                     _TermSection(
-                      title: '9. EXENCIÓN DE RESPONSABILIDAD FUERA DE LÍNEA',
-                      content: 'CONVOS no recomienda ni organiza encuentros presenciales o citas cara a cara. Cualquier contacto, reunión o transacción fuera de la aplicación es responsabilidad exclusiva e independiente de los involucrados.',
+                      title: '6. RETENCIÓN CAUTELAR DE FONDOS POR INFRACCIÓN',
+                      content: 'En caso de baneo por faltas graves, acoso, fraude o violación de estas normas, los saldos acumulados o pendientes quedarán retenidos en forma cautelar como penalización por daños y perjuicios.',
                     ),
 
-                    // 10. JURISDICCIÓN
+                    // 7. ECONOMÍA VIRTUAL Y NO REEMBOLSO
                     _TermSection(
-                      title: '10. LEY APLICABLE Y JURISDICCIÓN',
-                      content: 'Los presentes términos se rigen por las leyes de la República Argentina. Cualquier controversia judicial se someterá a los Tribunales Ordinarios en lo Comercial de la Ciudad Autónoma de Buenos Aires, sin perjuicio de las normas de orden público vigentes en materia de Defensa del Consumidor.',
+                      title: '7. BIENES DIGITALES Y POLÍTICA DE NO REEMBOLSO',
+                      content: 'Las fichas o tokens consumidos e intercambiados dentro de la plataforma son bienes digitales intangibles y no son reembolsables. Se garantiza el derecho de arrepentimiento (Ley 24.240, Art. 34) dentro de los 10 días exclusivamente sobre saldos NO consumidos.',
+                    ),
+
+                    // 8. CUMPLIMIENTO FISCAL
+                    _TermSection(
+                      title: '8. CUMPLIMIENTO FISCAL (ARCA / ARBA)',
+                      content: 'Las liquidaciones en Pesos Argentinos (ARS) vía CBU/CVU están sujetas a la validación del CUIT/CUIL y regímenes de información tributaria de los organismos correspondientes (ARCA y ARBA).',
+                    ),
+
+                    // 9. PRIVACIDAD DE DATOS
+                    _TermSection(
+                      title: '9. PROTECCIÓN DE DATOS PERSONALES (LEY 25.326 Y GDPR)',
+                      content: 'Los datos personales recopilados se tratan bajo estrictos protocolos de confidencialidad conforme a la Ley N° 25.326 de Argentina y estándares internacionales GDPR. El usuario puede ejercer sus derechos de acceso, rectificación o eliminación.',
+                    ),
+
+                    // 10. EXENCIÓN FUERA DE LÍNEA
+                    _TermSection(
+                      title: '10. EXENCIÓN DE RESPONSABILIDAD FUERA DE LÍNEA',
+                      content: 'CONVOS opera únicamente como plataforma de intermediación virtual. Cualquier encuentro, cita o reunión presencial fuera de la PWA es de exclusiva responsabilidad de las partes, quedando la plataforma eximida de cualquier reclamo.',
+                    ),
+
+                    // 11. AUTORIDADES
+                    _TermSection(
+                      title: '11. COOPERACIÓN CON AUTORIDADES JUDICIALES',
+                      content: 'Ante sospechas de ilícitos, extorsión o delitos digitales, CONVOS prestará colaboración activa compartiendo registros y datos identificatorios con las autoridades judiciales competentes.',
+                    ),
+
+                    // 12. JURISDICCIÓN
+                    _TermSection(
+                      title: '12. LEY APLICABLE Y JURISDICCIÓN',
+                      content: 'Estos términos se rigen por la legislación de la República Argentina. Cualquier controversia se someterá a los Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires (CABA).',
                     ),
                   ],
                 ),

@@ -56,8 +56,65 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
   }
 
   // Guarda/Actualiza los datos bancarios y simula la solicitud de retiro
+  // Guarda/Actualiza los datos bancarios y procesa la solicitud de retiro con validación de días y mínimos
   Future<void> _solicitarRetiro() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // 1. REGLA: Validar que sea lunes (DateTime.monday = 1)
+    if (DateTime.now().weekday != DateTime.monday) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: const Text(
+            'Día no habilitado',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'Las solicitudes de retiro de fondos se procesan únicamente los días lunes. Por favor, vuelve a intentarlo el próximo lunes.',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Entendido',
+                style: TextStyle(color: Color(0xFF8B5CF6)),
+              ),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // 2. REGLA: Validar monto mínimo de $15.000 ARS
+    if (widget.gananciasArs < 15000) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: const Text(
+            'Monto mínimo no alcanzado',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            'El monto mínimo para solicitar un retiro es de \$15.000 ARS. Actualmente tienes \$${widget.gananciasArs.toStringAsFixed(0)} ARS acumulados.',
+            style: const TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Entendido',
+                style: TextStyle(color: Color(0xFF8B5CF6)),
+              ),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -65,7 +122,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
       final user = supabase.auth.currentUser;
       if (user == null) throw Exception('Usuario no identificado');
 
-      // 1. Guardar o actualizar CBU/CVU en Supabase
+      // 3. Guardar o actualizar CBU/CVU en Supabase
       await supabase.from('creator_payout_details').upsert({
         'user_id': user.id,
         'cbu_cvu': _cbuController.text.trim(),
@@ -76,7 +133,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
 
       if (!mounted) return;
 
-      // 2. Mostrar confirmación a la Creadora
+      // 4. Mostrar confirmación a la Creadora
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -92,7 +149,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             ],
           ),
           content: Text(
-            'Se ha registrado tu solicitud de retiro por \$${widget.gananciasArs.toStringAsFixed(0)} ARS (USD \$${widget.gananciasUsd.toStringAsFixed(2)}).\n\nEl pago se acreditará en tu cuenta en un plazo de 24 a 48 hs hábiles.',
+            'Se ha registrado tu solicitud de retiro por \$${widget.gananciasArs.toStringAsFixed(0)} ARS (USD \$${widget.gananciasUsd.toStringAsFixed(2)}).\n\nEl pago se acreditará en tu cuenta vinculada de Mercado Pago en un plazo de 24 a 48 hs hábiles.',
             style: const TextStyle(color: Colors.white70),
           ),
           actions: [

@@ -225,7 +225,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double gananciasUsd = (_tokensCreadoraGanados * 0.01) * 0.50;
+    // Calculamos los tokens netos que le corresponden a la creadora (50%)
+    int tokensNetosCreadora = (_tokensCreadoraGanados * 0.50).toInt();
+
+    // Mantenemos la conversión a USD y ARS sobre esos tokens netos
+    double gananciasUsd = tokensNetosCreadora * 0.01;
     double gananciasArs = gananciasUsd * _dolarCotizacion;
 
     return Scaffold(
@@ -368,23 +372,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Ganancias Disponibles',
+                      const Text(
+                        'Tokens Acumulados (Tu 50%)',
                         style: TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'Saldo Neto',
+                          style: TextStyle(
+                            color: Color(0xFF10B981),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'USD \$${gananciasUsd.toStringAsFixed(2)} (~ \$${gananciasArs.toStringAsFixed(0)} ARS)',
+                    '$tokensNetosCreadora Tokens',
                     style: const TextStyle(
                       color: Color(0xFF10B981),
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Equivalente: USD \$${gananciasUsd.toStringAsFixed(2)} (~ \$${gananciasArs.toStringAsFixed(0)} ARS)',
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                   const Divider(color: Colors.white12, height: 20),
                   SizedBox(

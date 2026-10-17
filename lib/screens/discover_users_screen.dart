@@ -24,11 +24,32 @@ class _DiscoverUsersScreenState extends State<DiscoverUsersScreen> {
       }
 
       final response = await query.order('created_at', ascending: false);
-      return List<Map<String, dynamic>>.from(response);
+      if (response != null && (response as List).isNotEmpty) {
+        return List<Map<String, dynamic>>.from(response);
+      }
     } catch (e) {
       debugPrint('Error al cargar feed de videos: $e');
-      return [];
     }
+
+    // Datos de prueba garantizados para que el feed nunca esté vacío y puedas probar bloqueos
+    return [
+      {
+        'id': '1',
+        'username': 'Sofia_Live',
+        'title': 'Transmisión en vivo y novedades de la semana 🚀',
+        'video_url': '',
+        'likes': 1250,
+        'comments': 84,
+      },
+      {
+        'id': '2',
+        'username': 'Camila_Vibes',
+        'title': 'Música y charlas en CON VOS 🎵',
+        'video_url': '',
+        'likes': 840,
+        'comments': 32,
+      },
+    ];
   }
 
   @override
